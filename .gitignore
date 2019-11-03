@@ -1,0 +1,9 @@
+
+#IDE configs
+.history
+.vscode
+.idea
+
+
+.env
+node_modules

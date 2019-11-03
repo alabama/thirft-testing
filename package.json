@@ -1,0 +1,32 @@
+{
+  "repository": {},
+  "name": "thrift-testing",
+  "license": "MIT",
+  "version": "0.1.0",
+  "keywords": [],
+  "author": "Eugen Kandakov",
+  "private": true,
+  "scripts": {
+    "build:prod": "cross-env NODE_ENV=production node_modules/.bin/webpack",
+    "build:dev": "cross-env NODE_ENV=development node_modules/.bin/webpack",
+    "watch": "cross-env NODE_ENV=development node_modules/.bin/webpack --watch --colors --progress",
+    "start": "webpack-dev-server --open"
+  },
+  "dependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "babel-loader": "^8.0.6",
+    "copy-webpack-plugin": "^5.0.4",
+    "cross-env": "^6.0.3",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "json-int64": "^1.0.1",
+    "node-int64": "^0.4.0",
+    "thrift": "apache/thrift.git#0.13.0",
+    "webpack": "^4.41.2",
+    "webpack-dev-server": "^3.9.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.3.10"
+  }
+}
