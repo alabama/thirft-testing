@@ -1,3 +1,4 @@
+import {HOST, WSPORT} from "./config";
 import Int64Util from 'thrift/lib/nodejs/lib/thrift/int64_util';
 import Int64 from 'node-int64';
 import JSONInt64 from 'json-int64';
@@ -10,7 +11,7 @@ export default function testThrift() {
   }
 
   if (typeof Thrift !== 'undefined') {
-    const transport = new Thrift.TWebSocketTransport('ws://www.pyoneer.test:9090');
+    const transport = new Thrift.TWebSocketTransport(`ws://${HOST}:${WSPORT}`);
     const protocol = new Thrift.TJSONProtocol(transport);
     const client = new CalculatorClient(protocol);
     transport.open();

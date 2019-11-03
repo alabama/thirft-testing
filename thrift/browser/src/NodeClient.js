@@ -17,7 +17,7 @@
  * under the License.
  */
 
-
+import {HOST, WSPORT} from "./config";
 import thrift from 'thrift';
 //import ThriftBrowser from './lib/thrift';
 
@@ -48,7 +48,7 @@ export default function testThrift() {
   const transport = thrift.TBufferedTransport;
   const protocol = thrift.TJSONProtocol;
 
-  const connection = thrift.createXHRConnection("ws://www.pyoneer.test", 9090, {
+  const connection = thrift.createXHRConnection(`ws://${HOST}`, WSPORT, {
     transport: transport,
     protocol: protocol,
     wsOptions : {

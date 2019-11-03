@@ -17,7 +17,7 @@
  * under the License.
  */
 
-
+import {HOST, WSPORT} from "./config";
 import thrift from 'thrift';
 //import ThriftBrowser from './lib/thrift';
 
@@ -48,9 +48,9 @@ export default function testThrift() {
   const transport = thrift.TBufferedTransport;
   const protocol = thrift.TBinaryProtocol;
 
-  const connection = thrift.createXHRConnection("www.pyoneer.test", 9090, {
+  const connection = thrift.createXHRConnection(HOST, WSPORT, {
     transport: transport,
-    protocol: protocol,
+    protocol: protocol, //THERE IS A BUG: https://issues.apache.org/jira/browse/THRIFT-4987
     wsOptions : {
       rejectUnauthorized: false // for SSL and unauthorized certificate
     },

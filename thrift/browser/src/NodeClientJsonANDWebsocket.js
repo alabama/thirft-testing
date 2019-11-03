@@ -19,11 +19,12 @@
 
 
 import thrift from 'thrift';
+import {HOST, WSPORT} from "./config";
 
-import './gen-js/shared_types';
-import './gen-js/tutorial_types';
-import './gen-js/SharedService';
-import './gen-js/Calculator';
+import './gen-js-es6/shared_types';
+import './gen-js-es6/tutorial_types';
+import './gen-js-es6/SharedService';
+import './gen-js-es6/Calculator';
 
 import assert from 'assert';
 
@@ -34,10 +35,10 @@ export default function testThrift() {
   console.log(CalculatorClient);
   debugger;
 
-  const transport = new thrift.TWebSocketTransport("ws://www.pyoneer.test:9090");
+  const transport = new thrift.TWebSocketTransport(`ws://${HOST}:${WSPORT}`);
   const protocol = thrift.TJSONProtocol;
 
-  const connection = thrift.createXHRConnection("www.pyoneer.test", 9090, {
+  const connection = thrift.createXHRConnection(HOST, WSPORT, {
     transport: transport,
     protocol: protocol,
     wsOptions : {

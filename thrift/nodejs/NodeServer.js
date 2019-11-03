@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+require('dotenv').config();
 
 var thrift = require("thrift");
 var Calculator = require("./gen-nodejs/Calculator");
@@ -96,12 +97,14 @@ var ServerOpt = {
     '/': CalculatorOpt
   },
   cors: {
-    "http://www.pyoneer.test:9000": true // this means allowing requests of the port the webserver (in this case webpack is running on)
+    "*": true, // this means allowing requests of everywere!
+    //"localhost": true,
+    //"http://www.testdomain.test:9000": true
   },
 };
 
 //Create and start the web server
-const port = 9090;
-thrift.createWebServer(ServerOpt).listen(9090);
-console.log("Http/Thrift Server running on port: " + 9090);
+const port = process.env.WSPORT || 9090;
+thrift.createWebServer(ServerOpt).listen(port);
+console.log("Http/Thrift Server running on port: " + port);
 console.log("Serving files from: " + __dirname);

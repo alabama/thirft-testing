@@ -1,7 +1,10 @@
+require('dotenv').config();
+
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const DotEnv = require('dotenv-webpack');
 
 const contextPath = path.resolve(__dirname, './thrift/browser');
 const isProd = process.env.NODE_ENV === 'production';
@@ -19,6 +22,7 @@ const getPlugins = () => {
       { from: `./src/gen-js/`, to: `${exportPath}/js/gen-js` },
       { from: `./src/lib/`, to: `${exportPath}/js` }
     ]),
+    new DotEnv(),
     new webpack.ProvidePlugin({
       //SharedServiceClient: `${contextPath}/src/gen-js/SharedService`
       /*Int64: 'node-int64',
@@ -43,7 +47,7 @@ module.exports = {
     CalculatorClient: 'CalculatorClient'
   },
   devServer: {
-    host: process.env.HOST || '0.0.0.0',
+    host: process.env.HOST || 'localhost',
     disableHostCheck: true,
     contentBase: `${exportPath}`,
     publicPath: '/',
