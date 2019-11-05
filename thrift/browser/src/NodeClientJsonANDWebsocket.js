@@ -21,45 +21,34 @@
 import thrift from 'thrift';
 import {HOST, WSPORT} from "./config";
 
-import './gen-js-es6/shared_types';
-import './gen-js-es6/tutorial_types';
-import './gen-js-es6/SharedService';
-import './gen-js-es6/Calculator';
+import TTypes from './gen-nodejs/tutorial_types';
+import Calculator from './gen-nodejs/Calculator';
+import wsConnection from './ws_connection';
 
 import assert from 'assert';
 
 export default function testThrift() {
-  debugger;
-  console.log(thrift);
-  window.Thrift = thrift.Thrift;
-  console.log(CalculatorClient);
-  debugger;
 
-  const transport = new thrift.TWebSocketTransport(`ws://${HOST}:${WSPORT}`);
-  const protocol = thrift.TJSONProtocol;
+  const transport = thrift.TBufferedTransport;
+  const protocol = thrift.TBinaryProtocol;
+  console.log(`Transport used: ${transport.name}`);
+  console.log(`Protocol used: ${(protocol.name)}`);
 
-  const connection = thrift.createXHRConnection(HOST, WSPORT, {
-    transport: transport,
-    protocol: protocol,
-    wsOptions : {
-      rejectUnauthorized: false // for SSL and unauthorized certificate
-    },
+  const connection = wsConnection.createWSConnection(HOST, WSPORT, {
+    transport : transport,
+    protocol : protocol
   });
+  connection.open();
 
-  connection.on('error', function (err) {
+  connection.on('error', function(err) {
     assert(false, err);
   });
 
-  var writeCb = function(buf, seqid) {
-    connection.write(buf,seqid);
-  };
-  const buffedTransport = new thrift.TBufferedTransport(undefined, writeCb);
-  const client = new CalculatorClient(new thrift.TJSONProtocol(buffedTransport));
-  transport.client = client;
-  connection.client = client;
-  transport.open();
+  // Create a Calculator client with the connection
+  const client = wsConnection.createWSClient(Calculator, connection);
 
   client.ping(function (err, response) {
+    debugger;
     console.log('ping()');
   });
 
@@ -69,8 +58,8 @@ export default function testThrift() {
   });
 
 
-  const work = new Work();
-  work.op = Operation.DIVIDE;
+  const work = new TTypes.Work();
+  work.op = TTypes.Operation.DIVIDE;
   work.num1 = 1;
   work.num2 = 0;
 
@@ -82,7 +71,7 @@ export default function testThrift() {
     }
   });
 
-  work.op = Operation.SUBTRACT;
+  work.op = TTypes.Operation.SUBTRACT;
   work.num1 = 15;
   work.num2 = 10;
 
@@ -93,7 +82,7 @@ export default function testThrift() {
       console.log('Check log: ' + message.value);
 
       //close the connection once we're done
-      connection.end();
+      connection.close();
     });
   });
 }

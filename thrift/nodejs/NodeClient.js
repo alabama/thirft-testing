@@ -23,7 +23,7 @@ var ttypes = require('./gen-nodejs/tutorial_types');
 const assert = require('assert');
 
 var transport = thrift.TBufferedTransport;
-var protocol = thrift.TJSONProtocol;
+var protocol = thrift.TBinaryProtocol;
 
 var connection = thrift.createWSConnection("localhost", 9090, {
   transport : transport,

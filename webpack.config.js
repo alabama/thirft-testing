@@ -23,12 +23,6 @@ const getPlugins = () => {
       { from: `./src/lib/`, to: `${exportPath}/js` }
     ]),
     new DotEnv(),
-    new webpack.ProvidePlugin({
-      //SharedServiceClient: `${contextPath}/src/gen-js/SharedService`
-      /*Int64: 'node-int64',
-      Int64Util: 'thrift/lib/nodejs/lib/thrift/int64_util',
-      JSONInt64: 'json-int64',*/
-    }),
   ]
 };
 module.exports = {
