@@ -1,16 +1,11 @@
 require('dotenv').config();
 
-const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
 const DotEnv = require('dotenv-webpack');
 
 const contextPath = path.resolve(__dirname, './thrift/browser');
-const isProd = process.env.NODE_ENV === 'production';
 const exportPath = `${contextPath}/dist`;
-
-const getMode = () => isProd ? 'production' : 'development';
 
 const getPlugins = () => {
   return [
@@ -18,27 +13,16 @@ const getPlugins = () => {
       filename: 'index.html',
       template: './src/index.html'
     }),
-    new CopyPlugin([
-      { from: `./src/gen-js/`, to: `${exportPath}/js/gen-js` },
-      { from: `./src/lib/`, to: `${exportPath}/js` }
-    ]),
     new DotEnv(),
   ]
 };
 module.exports = {
   context: contextPath,
   entry: ['./index.js'],
-  mode: getMode(),
+  mode: 'development',
   output: {
     path: `${exportPath}`,
     filename: 'js/[name].js',
-  },
-  externals: {
-    Int64: 'node-int64',
-    Int64Util: 'thrift/lib/nodejs/lib/thrift/int64_util',
-    JSONInt64: 'json-int64',
-    Thrift: 'Thrift',
-    CalculatorClient: 'CalculatorClient'
   },
   devServer: {
     host: process.env.HOST || 'localhost',

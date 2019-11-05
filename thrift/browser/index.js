@@ -1,2 +1,2 @@
-import testThrift from "./src/NodeClientJsonANDWebsocket";
+import testThrift from "./src/sample";
 testThrift();
