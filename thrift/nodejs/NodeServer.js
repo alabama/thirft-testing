@@ -86,7 +86,7 @@ var CalculatorHandler = {
 var CalculatorOpt = {
   handler: CalculatorHandler,
   processor: Calculator,
-  protocol: thrift.TJSONProtocol,
+  protocol: thrift.TBinaryProtocol,
   transport: thrift.TBufferedTransport,
 };
 
@@ -97,7 +97,7 @@ var ServerOpt = {
     '/': CalculatorOpt
   },
   cors: {
-    "*": true, // this means allowing requests of everywere!
+    "*": true, // this means allowing requests of everywhere!
     //"localhost": true,
     //"http://www.testdomain.test:9000": true
   },

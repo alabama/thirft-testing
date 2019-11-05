@@ -1,4 +1,4 @@
-# thirft-testing
+# thrift-testing
 Simple tests with thrift and it's js files
 
 ## Install

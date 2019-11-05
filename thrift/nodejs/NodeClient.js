@@ -25,19 +25,18 @@ const assert = require('assert');
 var transport = thrift.TBufferedTransport;
 var protocol = thrift.TBinaryProtocol;
 
-var connection = thrift.createConnection("localhost", 9090, {
+var connection = thrift.createWSConnection("localhost", 9090, {
   transport : transport,
   protocol : protocol
 });
+connection.open();
 
 connection.on('error', function(err) {
   assert(false, err);
 });
 
 // Create a Calculator client with the connection
-var client = thrift.createClient(Calculator, connection);
-
-
+var client = thrift.createWSClient(Calculator, connection);
 client.ping(function(err, response) {
   console.log('ping()');
 });
@@ -72,6 +71,7 @@ client.calculate(1, work, function(err, message) {
     console.log('Check log: ' + message.value);
 
     //close the connection once we're done
-    connection.end();
+    connection.close();
+    process.exit(0);
   });
 });

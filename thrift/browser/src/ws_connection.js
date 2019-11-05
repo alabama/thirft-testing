@@ -16,18 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var util = require('util');
-var WebSocket = require('ws');
-var EventEmitter = require("events").EventEmitter;
-var thrift = require('./thrift');
-var ttransport = require('./transport');
-var tprotocol = require('./protocol');
+const util = require('util');
+const WebSocket = require('websocket').w3cwebsocket;
+const EventEmitter = require("events").EventEmitter;
+const thrift = require('thrift');
 
-var TBufferedTransport = require('./buffered_transport');
-var TJSONProtocol = require('./json_protocol');
-var InputBufferUnderrunError = require('./input_buffer_underrun_error');
+const TBufferedTransport = require('thrift/lib/nodejs/lib/thrift/buffered_transport');
+const TJSONProtocol = require('thrift/lib/nodejs/lib/thrift/json_protocol');
+const InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error');
 
-var createClient = require('./create_client');
+const createClient = require('thrift/lib/nodejs/lib/thrift/create_client');
 
 exports.WSConnection = WSConnection;
 
@@ -69,7 +67,7 @@ exports.WSConnection = WSConnection;
  * @throws {error} Exceptions other than ttransport.InputBufferUnderrunError are rethrown
  * @event {error} The "error" event is fired when a Node.js error event occurs during
  *     request or response processing, in which case the node error is passed on. An "error"
- *     event may also be fired when the connectison can not map a response back to the
+ *     event may also be fired when the connection can not map a response back to the
  *     appropriate client (an internal error), generating a TApplicationException.
  * @classdesc WSConnection objects provide Thrift end point transport
  *     semantics implemented using Websockets.
@@ -80,7 +78,6 @@ function WSConnection(host, port, options) {
   EventEmitter.call(this);
 
   //Set configuration
-  var self = this;
   this.options = options || {};
   this.host = host;
   this.port = port;
@@ -101,10 +98,10 @@ function WSConnection(host, port, options) {
     path: this.options.path || '/',
     headers: this.options.headers || {}
   };
-  for (var attrname in this.options.wsOptions) {
+  for (let attrname in this.options.wsOptions) {
     this.wsOptions[attrname] = this.options.wsOptions[attrname];
   }
-};
+}
 util.inherits(WSConnection, EventEmitter);
 
 WSConnection.prototype.__reset = function() {
@@ -113,30 +110,29 @@ WSConnection.prototype.__reset = function() {
 };
 
 WSConnection.prototype.__onOpen = function() {
-  var self = this;
   this.emit("open");
   if (this.send_pending.length > 0) {
     //If the user made calls before the connection was fully
     //open, send them now
     this.send_pending.forEach(function(data) {
-      self.socket.send(data);
-    });
+      this.socket.send(data);
+    }, this);
     this.send_pending = [];
   }
 };
 
-WSConnection.prototype.__onClose = function(evt) {
+WSConnection.prototype.__onClose = function() {
   this.emit("close");
   this.__reset();
 };
 
 WSConnection.prototype.__decodeCallback = function(transport_with_data) {
-  var proto = new this.protocol(transport_with_data);
+  const proto = new this.protocol(transport_with_data);
   try {
     while (true) {
-      var header = proto.readMessageBegin();
-      var dummy_seqid = header.rseqid * -1;
-      var client = this.client;
+      const header = proto.readMessageBegin();
+      const dummy_seqid = header.rseqid * -1;
+      let client = this.client;
       //The Multiplexed Protocol stores a hash of seqid to service names
       //  in seqId2Service. If the SeqId is found in the hash we need to
       //  lookup the appropriate client for this call.
@@ -149,7 +145,7 @@ WSConnection.prototype.__decodeCallback = function(transport_with_data) {
       //  should bring this stuff inline with typical thrift I/O stack
       //  operation soon.
       //  --ra
-      var service_name = this.seqId2Service[header.rseqid];
+      const service_name = this.seqId2Service[header.rseqid];
       if (service_name) {
         client = this.client[service_name];
         delete this.seqId2Service[header.rseqid];
@@ -157,7 +153,7 @@ WSConnection.prototype.__decodeCallback = function(transport_with_data) {
       /*jshint -W083 */
       client._reqs[dummy_seqid] = function(err, success) {
         transport_with_data.commitPosition();
-        var clientCallback = client._reqs[header.rseqid];
+        const clientCallback = client._reqs[header.rseqid];
         delete client._reqs[header.rseqid];
         if (clientCallback) {
           clientCallback(err, success);
@@ -169,8 +165,8 @@ WSConnection.prototype.__decodeCallback = function(transport_with_data) {
       } else {
         delete client._reqs[dummy_seqid];
         this.emit("error",
-          new thrift.TApplicationException(
-            thrift.TApplicationExceptionType.WRONG_METHOD_NAME,
+          new thrift.Thrift.TApplicationException(
+            thrift.Thrift.TApplicationExceptionType.WRONG_METHOD_NAME,
             "Received a response to an unknown RPC function"));
       }
     }
@@ -184,12 +180,18 @@ WSConnection.prototype.__decodeCallback = function(transport_with_data) {
 };
 
 WSConnection.prototype.__onData = function(data) {
-  if (Object.prototype.toString.call(data) == "[object ArrayBuffer]") {
+  //... little hack to get the needed ArrayBuffer, if this is developed further, than make blob workable with Buffer!!
+  let promise = Promise.resolve(data);
+  if (Object.prototype.toString.call(data) === "[object ArrayBuffer]") {
     data = new Uint8Array(data);
   }
-  var buf = new Buffer(data);
-  this.transport.receiver(this.__decodeCallback.bind(this))(buf);
-
+  if (Object.prototype.toString.call(data) === "[object Blob]") {
+    promise = new Response(data).arrayBuffer()
+  }
+  promise.then(data => {
+    const buf = new Buffer(data);
+    this.transport.receiver(this.__decodeCallback.bind(this))(buf);
+  });
 };
 
 WSConnection.prototype.__onMessage = function(evt) {
@@ -207,7 +209,7 @@ WSConnection.prototype.__onError = function(evt) {
  * @returns {boolean}
  */
 WSConnection.prototype.isOpen = function() {
-  return this.socket && this.socket.readyState == this.socket.OPEN;
+  return this.socket && this.socket.readyState === this.socket.OPEN;
 };
 
 /**
@@ -215,12 +217,11 @@ WSConnection.prototype.isOpen = function() {
  */
 WSConnection.prototype.open = function() {
   //If OPEN/CONNECTING/CLOSING ignore additional opens
-  if (this.socket && this.socket.readyState != this.socket.CLOSED) {
+  if (this.socket && this.socket.readyState !== this.socket.CLOSED) {
     return;
   }
-  //If there is no socket or the socket is closed:
-  this.socket = new WebSocket(this.uri(), "", this.wsOptions);
-  this.socket.binaryType = 'arraybuffer';
+  this.socket = new WebSocket(this.uri());
+  this.socket.binaryType = 'arraybuffer'; //important!
   this.socket.onopen = this.__onOpen.bind(this);
   this.socket.onmessage = this.__onMessage.bind(this);
   this.socket.onerror = this.__onError.bind(this);
@@ -239,14 +240,14 @@ WSConnection.prototype.close = function() {
  * @returns {string} URI
  */
 WSConnection.prototype.uri = function() {
-  var schema = this.secure ? 'wss' : 'ws';
-  var port = '';
-  var path = this.path || '/';
-  var host = this.host;
+  const schema = this.secure ? 'wss' : 'ws';
+  let port = '';
+  const path = this.path || '/';
+  const host = this.host;
 
   // avoid port if default for schema
-  if (this.port && (('wss' == schema && this.port != 443) ||
-    ('ws' == schema && this.port != 80))) {
+  if (this.port && (('wss' === schema && this.port !== 443) ||
+    ('ws' === schema && this.port !== 80))) {
     port = ':' + this.port;
   }
 
@@ -275,7 +276,7 @@ WSConnection.prototype.write = function(data) {
  *    to Thrift HTTP based servers.
  * @param {string} host - The host name or IP to connect to.
  * @param {number} port - The TCP port to connect to.
- * @param {WSConnectOptions} options - The configuration options to use.
+ * @param {object} options - The configuration options to use.
  * @returns {WSConnection} The connection object.
  * @see {@link WSConnectOptions}
  */

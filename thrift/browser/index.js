@@ -1,2 +1,2 @@
-import testThrift from "./src/BrowserClient";
+import testThrift from "./src/sample";
 testThrift();
