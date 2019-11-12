@@ -3,7 +3,6 @@ import {HOST, WSPORT} from "./config";
 
 import TTypes from './gen-nodejs/tutorial_types';
 import Calculator from './gen-nodejs/Calculator';
-import wsConnection from './ws_connection';
 import assert from 'assert';
 
 export default function testThrift() {
@@ -13,7 +12,7 @@ export default function testThrift() {
   console.log(`Transport used: ${transport.name}`);
   console.log(`Protocol used: ${(protocol.name)}`);
 
-  const connection = wsConnection.createWSConnection(HOST, WSPORT, {
+  const connection = thrift.createWSConnection(HOST, WSPORT, {
     transport : transport,
     protocol : protocol
   });
@@ -24,7 +23,7 @@ export default function testThrift() {
   });
 
   // Create a Calculator client with the connection
-  const client = wsConnection.createWSClient(Calculator, connection);
+  const client = thrift.createWSClient(Calculator, connection);
 
   client.ping(function (err, response) {
     console.log('ping()');
