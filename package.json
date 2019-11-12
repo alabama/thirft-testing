@@ -14,12 +14,9 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
-    "events": "^3.0.0",
     "json-int64": "^1.0.1",
     "node-int64": "^0.4.0",
-    "thrift": "apache/thrift.git#0.13.0",
-    "util": "^0.12.1",
-    "websocket": "^1.0.30"
+    "thrift": "alabama/thrift.git#master"
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",
